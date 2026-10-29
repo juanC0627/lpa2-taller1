@@ -1,21 +1,20 @@
-from rich.prompt import Confirm
+from rich.prompt import Confirm, IntPrompt, Prompt
 from rich.table import Table
-from rich.prompt import Prompt
-from rich.prompt import IntPrompt
 
 """
 Interfaz de usuario usando Rich para crear un menú interactivo y atractivo.
 """
 
-from rich.console import Console
-from rich.text import Text
-from rich.panel import Panel
-from typing import List, Optional
 import time
+
+from models.mueble import Mueble
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
 
 # Corrección de imports para ejecución directa
 from services.tienda import TiendaMuebles
-from models.mueble import Mueble
+
 # TODO: Importar los servicios y modelos
 
 
@@ -70,10 +69,8 @@ class MenuTienda:
             try:
                 precio = f"${mueble.calcular_precio():.2f}"
                 tipo = type(mueble).__name__
-                table.add_row(
-                    str(i), mueble.nombre, tipo, mueble.material, mueble.color, precio
-                )
-            except Exception as e:
+                table.add_row(str(i), mueble.nombre, tipo, mueble.material, mueble.color, precio)
+            except Exception:
                 table.add_row(str(i), mueble.nombre, "Error", "-", "-", "Error")
 
         self.console.print(table)
@@ -81,9 +78,7 @@ class MenuTienda:
     def buscar_muebles_interactivo(self):
         """Interfaz interactiva para buscar muebles."""
 
-        termino_busqueda = Prompt.ask(
-            "[green]Ingresa el nombre o parte del nombre a buscar[/green]"
-        )
+        termino_busqueda = Prompt.ask("[green]Ingresa el nombre o parte del nombre a buscar[/green]")
 
         if not termino_busqueda.strip():
             self.console.print("[red]Término de búsqueda vacío.[/red]")
@@ -94,14 +89,10 @@ class MenuTienda:
             resultados = self.tienda.buscar_muebles_por_nombre(termino_busqueda)
 
         if not resultados:
-            self.console.print(
-                f"[yellow]No se encontraron muebles que contengan '{termino_busqueda}'.[/yellow]"
-            )
+            self.console.print(f"[yellow]No se encontraron muebles que contengan '{termino_busqueda}'.[/yellow]")
             return
 
-        self.console.print(
-            f"\n[green]Se encontraron {len(resultados)} resultado(s):[/green]"
-        )
+        self.console.print(f"\n[green]Se encontraron {len(resultados)} resultado(s):[/green]")
         self._mostrar_lista_muebles(resultados)
 
     def filtrar_por_precio_interactivo(self):
@@ -111,17 +102,13 @@ class MenuTienda:
 
         precio_min = IntPrompt.ask("Precio mínimo", default=0, show_default=True)
 
-        precio_max = IntPrompt.ask(
-            "Precio máximo (0 = sin límite)", default=0, show_default=True
-        )
+        precio_max = IntPrompt.ask("Precio máximo (0 = sin límite)", default=0, show_default=True)
 
         if precio_max == 0:
             precio_max = float("inf")
 
         if precio_min > precio_max:
-            self.console.print(
-                "[red]Error: El precio mínimo no puede ser mayor al máximo.[/red]"
-            )
+            self.console.print("[red]Error: El precio mínimo no puede ser mayor al máximo.[/red]")
             return
 
         with self.console.status("[bold green]Filtrando muebles..."):
@@ -129,22 +116,16 @@ class MenuTienda:
             resultados = self.tienda.filtrar_por_precio(precio_min, precio_max)
 
         if not resultados:
-            self.console.print(
-                f"[yellow]No hay muebles en el rango ${precio_min} - ${precio_max}.[/yellow]"
-            )
+            self.console.print(f"[yellow]No hay muebles en el rango ${precio_min} - ${precio_max}.[/yellow]")
             return
 
-        self.console.print(
-            f"\n[green]Se encontraron {len(resultados)} mueble(s) en el rango:[/green]"
-        )
+        self.console.print(f"\n[green]Se encontraron {len(resultados)} mueble(s) en el rango:[/green]")
         self._mostrar_lista_muebles(resultados)
 
     def filtrar_por_material_interactivo(self):
         """Interfaz interactiva para filtrar por material."""
 
-        material = Prompt.ask(
-            "[green]Ingresa el material a buscar (ej: madera, metal, plástico)[/green]"
-        )
+        material = Prompt.ask("[green]Ingresa el material a buscar (ej: madera, metal, plástico)[/green]")
 
         if not material.strip():
             self.console.print("[red]Material no puede estar vacío.[/red]")
@@ -155,9 +136,7 @@ class MenuTienda:
             resultados = self.tienda.filtrar_por_material(material)
 
         if not resultados:
-            self.console.print(
-                f"[yellow]No hay muebles de material '{material}'.[/yellow]"
-            )
+            self.console.print(f"[yellow]No hay muebles de material '{material}'.[/yellow]")
             return
 
         self.console.print(f"\n[green]Muebles de {material} encontrados:[/green]")
@@ -198,7 +177,7 @@ class MenuTienda:
             mueble_seleccionado = muebles[indice - 1]
 
             # Mostrar detalles del mueble
-            self.console.print(f"\n[green]Mueble seleccionado:[/green]")
+            self.console.print("\n[green]Mueble seleccionado:[/green]")
             self.console.print(mueble_seleccionado.obtener_descripcion())
 
             confirmar = Confirm.ask("\n¿Confirmar la venta?")
@@ -231,9 +210,7 @@ class MenuTienda:
         table.add_column("Valor", style="magenta", justify="right")
         table.add_row("Total de muebles", str(stats.get("total_muebles", 0)))
         table.add_row("Total de comedores", str(stats.get("total_comedores", 0)))
-        table.add_row(
-            "Valor del inventario", f"${stats.get('valor_inventario', 0):.2f}"
-        )
+        table.add_row("Valor del inventario", f"${stats.get('valor_inventario', 0):.2f}")
         table.add_row("Ventas realizadas", str(stats.get("ventas_realizadas", 0)))
         table.add_row("Descuentos activos", str(stats.get("descuentos_activos", {})))
         # Estadísticas acumulativas
@@ -271,9 +248,7 @@ class MenuTienda:
         # Preguntar si desea guardar el reporte
         guardar = Confirm.ask("¿Deseas guardar el reporte en un archivo?")
         if guardar:
-            filename = Prompt.ask(
-                "Nombre del archivo", default="reporte_inventario.txt"
-            )
+            filename = Prompt.ask("Nombre del archivo", default="reporte_inventario.txt")
             try:
                 with open(filename, "w", encoding="utf-8") as f:
                     f.write(reporte)
@@ -316,7 +291,7 @@ class MenuTienda:
         except (ValueError, IndexError):
             self.console.print("[red]Selección inválida.[/red]")
 
-    def _mostrar_lista_muebles(self, muebles: List["Mueble"], numerada: bool = False):
+    def _mostrar_lista_muebles(self, muebles: list["Mueble"], numerada: bool = False):
         """
         Muestra una lista de muebles en formato tabla.
         Método auxiliar privado.
@@ -365,13 +340,13 @@ class MenuTienda:
 
         comprobante = f"""
         🧾 COMPROBANTE DE VENTA 🧾
-        
+
         Cliente: {venta["cliente"]}
         Producto: {venta["mueble"]}
         Precio original: ${venta["precio_original"]:.2f}
         Descuento aplicado: {venta["descuento"]:.1f}%
         PRECIO FINAL: ${venta["precio_final"]:.2f}
-        
+
         ¡Gracias por su compra!
         """
 
@@ -481,9 +456,7 @@ class MenuTienda:
         self.console.print(panel)
 
         try:
-            opcion = IntPrompt.ask(
-                "Selecciona una opción", choices=[str(i) for i in range(0, 10)]
-            )
+            opcion = IntPrompt.ask("Selecciona una opción", choices=[str(i) for i in range(0, 10)])
             return opcion
         except ValueError:
             self.console.print("[red]Opción inválida. Intenta de nuevo.[/red]")

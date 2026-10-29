@@ -3,6 +3,7 @@ Clase abstracta para muebles para superficies de trabajo o del hogar.
 """
 
 from abc import ABC, abstractmethod
+
 from models.mueble import Mueble
 
 
@@ -104,9 +105,7 @@ class Superficie(Mueble, ABC):
             str: Información detallada de dimensiones
         """
         area = self.calcular_area()
-        return (
-            f"Dimensiones: {self.largo}x{self.ancho}x{self.altura}cm (Área: {area}cm²)"
-        )
+        return f"Dimensiones: {self.largo}x{self.ancho}x{self.altura}cm (Área: {area}cm²)"
 
     @abstractmethod
     def calcular_precio(self) -> float:
